@@ -17,7 +17,7 @@ public class ConectaDB {
         try{
             Class.forName("com.mysql.jdbc.Driver");
             cn = DriverManager.getConnection(
-                    "jdbc:mysql://localhost:3306/dbprueba","root","dfcs");
+                    "jdbc:mysql://localhost:3306/dbprueba","root","");
         } catch (SQLException e2) {
             System.out.println("Error: "+e2.getMessage());
         } catch (Exception e){

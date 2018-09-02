@@ -7,6 +7,9 @@ package com.vista;
 
 import com.dto.Cliente;
 import com.negocio.ClienteNE;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JOptionPane;
@@ -21,6 +24,8 @@ public class FrmMantClientes extends javax.swing.JFrame {
     public ClienteNE clienteNE;
     public List<Cliente> lista;
     public Cliente cliente;
+    
+    private String ruta_txt = "mi.txt";
     
     DefaultTableModel modelo;
     
@@ -77,6 +82,44 @@ public class FrmMantClientes extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(null, "Error en ingreso" + rpta);
         }
     }
+     public void grabar_txt(){
+        FileWriter fw;
+        PrintWriter pw;
+        try{
+            fw = new FileWriter(ruta_txt);
+            pw = new PrintWriter(fw);
+            
+            for(int i = 0; i < clienteNE.cantidadRegistro(); i++){
+                cliente = clienteNE.obtenerRegistro(i);
+                pw.println(String.valueOf(cliente.getIdCliente()+", "+cliente.getDni()+", "+cliente.getNombre()+", "+cliente.getApellidos()+", "+cliente.getDireccion()));
+            }
+             pw.close();
+            
+        }catch(Exception ex){
+            mensaje("Error al grabar archivo: "+ex.getMessage());
+            System.out.println(ex.getMessage());
+        }
+    }
+    
+    public void ingresarRegistro(){
+        try{
+            if(leerId() == -666)mensaje("Ingresar codigo entero");
+            else if(leerNombre() == null)mensaje("Ingresar Nombre");
+            else if(leerApellido() == null)mensaje("Ingresar Apellido");
+            else if(leerDNI() == null) mensaje("Ingresar DNI");
+            else if(leerDireccion() == null)mensaje("Ingresar Direccion");
+            else{
+                cliente = new Cliente(leerId(), leerNombre(), leerApellido(), leerDNI(), leerDireccion());
+                if(clienteNE.buscaId(cliente.getIdCliente())!= -1)mensaje("Este codigo ya existe");
+                else clienteNE.agregarRegistro(cliente);
+                
+                grabar_txt();
+               
+            }
+        }catch(Exception ex){
+            mensaje(ex.getMessage());
+        }
+    }
     
     public void codCliente(){
         Integer id = clienteNE.idCliente();
@@ -126,6 +169,56 @@ public class FrmMantClientes extends javax.swing.JFrame {
         txtDNI.setText(null);
         txtDireccion.setText(null);
     }
+    
+    public int leerId(){
+        try{
+            int id = Integer.parseInt(lblIdCliente.getText().trim());
+            return id;
+        }catch(Exception ex){
+            return -666;
+        }
+    }
+    
+    public String leerNombre(){
+        try{
+            String nombre = txtNombre.getText().trim().replace(" ", "_");
+            return nombre;
+        }catch(Exception ex){
+            return null;
+        }
+    }
+    
+      public String leerApellido(){
+        try{
+            String apellidos = txtApellidos.getText().trim().replace(" ", "_");
+            return apellidos;
+        }catch(Exception ex){
+            return null;
+        }
+    }
+      
+      public String leerDNI(){
+        try{
+            String dni = txtDNI.getText().trim();
+            return dni;
+        }catch(Exception ex){
+            return null;
+        }
+    }
+      
+      public String leerDireccion(){
+        try{
+            String direccion = txtDireccion.getText().trim().replace(" ", "_");
+            return direccion;
+        }catch(Exception ex){
+            return null;
+        }
+    }
+    
+    
+    public void mensaje(String texto){
+        JOptionPane.showMessageDialog(null, texto);
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -144,6 +237,7 @@ public class FrmMantClientes extends javax.swing.JFrame {
         btnModificar = new javax.swing.JButton();
         btnEliminar = new javax.swing.JButton();
         btnSalir = new javax.swing.JButton();
+        btnExportar = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
@@ -226,6 +320,13 @@ public class FrmMantClientes extends javax.swing.JFrame {
             }
         });
 
+        btnExportar.setText("Exportar");
+        btnExportar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnExportarActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -241,18 +342,21 @@ public class FrmMantClientes extends javax.swing.JFrame {
                 .addComponent(btnEliminar)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnSalir)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(btnExportar)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                .addContainerGap(9, Short.MAX_VALUE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnNuevo)
                     .addComponent(btnGrabar)
                     .addComponent(btnModificar)
                     .addComponent(btnEliminar)
-                    .addComponent(btnSalir))
+                    .addComponent(btnSalir)
+                    .addComponent(btnExportar))
                 .addContainerGap())
         );
 
@@ -310,12 +414,13 @@ public class FrmMantClientes extends javax.swing.JFrame {
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel2)
-                    .addComponent(btnBuscar)
-                    .addComponent(jLabel4)
-                    .addComponent(txtNombre, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblIdCliente, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(lblIdCliente, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel2)
+                        .addComponent(btnBuscar)
+                        .addComponent(jLabel4)
+                        .addComponent(txtNombre, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(18, 18, 18)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3)
@@ -409,6 +514,14 @@ public class FrmMantClientes extends javax.swing.JFrame {
         limpiarEntradas();
     }//GEN-LAST:event_btnGrabarActionPerformed
 
+    private void btnExportarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExportarActionPerformed
+        // TODO add your handling code here:
+         
+        ingresarRegistro();
+        limpiarEntradas();
+        
+    }//GEN-LAST:event_btnExportarActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -447,6 +560,7 @@ public class FrmMantClientes extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnBuscar;
     private javax.swing.JButton btnEliminar;
+    private javax.swing.JButton btnExportar;
     private javax.swing.JButton btnGrabar;
     private javax.swing.JButton btnModificar;
     private javax.swing.JButton btnNuevo;

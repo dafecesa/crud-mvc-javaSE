@@ -16,6 +16,14 @@ public class Cliente implements Serializable{
     public Cliente(){
     }
 
+    public Cliente(int Id, String Nombre, String Apellido, String DNI, String Direccion) {
+        this.idCliente = Id;
+        this.nombre = Nombre;
+        this.apellidos = Apellido;
+        this.dni = DNI;
+        this.direccion = Direccion;
+    }
+
     public Integer getIdCliente() {
         return idCliente;
     }
